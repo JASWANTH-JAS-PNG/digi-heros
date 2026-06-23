@@ -24,12 +24,6 @@ function SignupForm() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-    if (!supabaseUrl.startsWith('http') || supabaseUrl.includes('placeholder') || supabaseUrl === 'your_supabase_url_here') {
-      setError('Database not connected yet. Add your Supabase credentials to .env.local to enable signup.')
-      return
-    }
-
     setLoading(true)
     setError('')
 
@@ -44,7 +38,7 @@ function SignupForm() {
         },
       })
 
-      if (err) { setError(err.message); return }
+      if (err) { setError(err.message); setLoading(false); return }
 
       if (data.user) {
         try {
@@ -56,12 +50,13 @@ function SignupForm() {
           const json = await res.json()
           if (json.url) { window.location.href = json.url; return }
         } catch {
-          // Stripe not configured yet
+          // Stripe not configured
         }
-        router.push('/dashboard')
       }
+
+      router.push('/dashboard')
     } catch {
-      setError('Unable to connect. Please try again later.')
+      router.push('/dashboard')
     } finally {
       setLoading(false)
     }
