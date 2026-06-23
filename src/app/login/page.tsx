@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import Particles from '@/components/Particles'
-
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail]       = useState('')
@@ -33,7 +31,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen animated-bg flex items-center justify-center px-4">
-      <Particles count={25} />
       <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/3 right-1/4 w-56 h-56 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
