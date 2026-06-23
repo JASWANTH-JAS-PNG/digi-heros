@@ -23,6 +23,13 @@ function SignupForm() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    if (!supabaseUrl.startsWith('http') || supabaseUrl.includes('placeholder') || supabaseUrl === 'your_supabase_url_here') {
+      setError('Database not connected yet. Add your Supabase credentials to .env.local to enable signup.')
+      return
+    }
+
     setLoading(true)
     setError('')
 
