@@ -19,13 +19,21 @@ function SignupForm() {
     charityPct: 10,
   })
   const [charities, setCharities] = useState<any[]>([])
+  const [charitiesLoading, setCharitiesLoading] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function loadCharities() {
-    const supabase = createClient()
-    const { data } = await supabase.from('charities').select('id, name, description').eq('is_active', true)
-    setCharities(data || [])
+    setCharitiesLoading(true)
+    try {
+      const supabase = createClient()
+      const { data } = await supabase.from('charities').select('id, name, description').eq('is_active', true)
+      setCharities(data || [])
+    } catch {
+      setCharities([])
+    } finally {
+      setCharitiesLoading(false)
+    }
   }
 
   async function handleStep1(e: React.FormEvent) {
@@ -238,8 +246,17 @@ function SignupForm() {
                 <p className="text-sm text-slate-400">Select a charity to receive your contribution (min 10%).</p>
 
                 <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
-                  {charities.length === 0 && (
-                    <div className="text-center py-4 text-slate-500 text-sm">Loading charities…</div>
+                  {charitiesLoading && (
+                    <div className="flex items-center justify-center gap-2 py-6 text-slate-500 text-sm">
+                      <div className="w-4 h-4 border-2 border-indigo-500/40 border-t-indigo-500 rounded-full animate-spin" />
+                      Loading charities…
+                    </div>
+                  )}
+                  {!charitiesLoading && charities.length === 0 && (
+                    <div className="text-center py-6 text-slate-500 text-sm glass rounded-xl border border-white/10">
+                      <p className="mb-1">No charities available yet.</p>
+                      <p className="text-xs text-slate-600">You can choose one after signing up.</p>
+                    </div>
                   )}
                   {charities.map(c => (
                     <button
@@ -289,7 +306,7 @@ function SignupForm() {
 
                 <motion.button
                   type="submit"
-                  disabled={loading || !form.charityId}
+                  disabled={loading || (charities.length > 0 && !form.charityId)}
                   whileHover={{ scale: loading ? 1 : 1.02 }}
                   whileTap={{ scale: loading ? 1 : 0.97 }}
                   className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold neon-indigo hover:from-indigo-400 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
