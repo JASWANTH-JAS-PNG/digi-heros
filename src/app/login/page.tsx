@@ -17,16 +17,18 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const supabase = createClient()
-    const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
-    if (err) {
-      setError(err.message)
+    try {
+      const supabase = createClient()
+      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
+      if (err) { setError(err.message); return }
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
+      router.push(profile?.role === 'admin' ? '/admin' : '/dashboard')
+      router.refresh()
+    } catch {
+      setError('Unable to connect. Please check your connection or try again later.')
+    } finally {
       setLoading(false)
-      return
     }
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-    router.push(profile?.role === 'admin' ? '/admin' : '/dashboard')
-    router.refresh()
   }
 
   return (

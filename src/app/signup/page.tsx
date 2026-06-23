@@ -46,33 +46,45 @@ function SignupForm() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const supabase = createClient()
 
-    const { data, error: err } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: { full_name: form.fullName },
-        emailRedirectTo: `${location.origin}/dashboard`,
-      },
-    })
+    try {
+      const supabase = createClient()
 
-    if (err) { setError(err.message); setLoading(false); return }
-
-    if (data.user) {
-      await supabase.from('profiles').update({
-        selected_charity_id: form.charityId || null,
-        charity_percentage: form.charityPct,
-      }).eq('id', data.user.id)
-
-      const res = await fetch('/api/subscriptions/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: form.plan, userId: data.user.id, email: form.email }),
+      const { data, error: err } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: { full_name: form.fullName },
+          emailRedirectTo: `${location.origin}/dashboard`,
+        },
       })
-      const { url } = await res.json()
-      if (url) window.location.href = url
-      else router.push('/dashboard')
+
+      if (err) { setError(err.message); setLoading(false); return }
+
+      if (data.user) {
+        await supabase.from('profiles').update({
+          selected_charity_id: form.charityId || null,
+          charity_percentage: form.charityPct,
+        }).eq('id', data.user.id)
+
+        try {
+          const res = await fetch('/api/subscriptions/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan: form.plan, userId: data.user.id, email: form.email }),
+          })
+          const { url } = await res.json()
+          if (url) { window.location.href = url; return }
+        } catch {
+          // Stripe not configured — go to dashboard
+        }
+
+        router.push('/dashboard')
+      }
+    } catch {
+      setError('Unable to connect. Please check your internet connection or try again later.')
+    } finally {
+      setLoading(false)
     }
   }
 
