@@ -8,6 +8,6 @@ export function createClient() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   return createBrowserClient(
     url && url.startsWith('http') ? url : PLACEHOLDER_URL,
-    key && key !== 'your_supabase_anon_key_here' ? key : PLACEHOLDER_KEY
+    key && key !== 'your_supabase_anon_key_here' && key.length > 20 ? key : PLACEHOLDER_KEY
   )
 }

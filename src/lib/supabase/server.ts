@@ -1,11 +1,27 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+const PLACEHOLDER_URL = 'https://placeholder.supabase.co'
+const PLACEHOLDER_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder'
+
+function getSupabaseUrl() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  return url && url.startsWith('http') ? url : PLACEHOLDER_URL
+}
+function getSupabaseAnonKey() {
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  return key && key !== 'your_supabase_anon_key_here' ? key : PLACEHOLDER_KEY
+}
+function getSupabaseServiceKey() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  return key && key !== 'your_supabase_service_role_key_here' ? key : PLACEHOLDER_KEY
+}
+
 export async function createClient() {
   const cookieStore = await cookies()
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    getSupabaseUrl(),
+    getSupabaseAnonKey(),
     {
       cookies: {
         getAll() { return cookieStore.getAll() },
@@ -24,8 +40,8 @@ export async function createClient() {
 export async function createAdminClient() {
   const cookieStore = await cookies()
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    getSupabaseUrl(),
+    getSupabaseServiceKey(),
     {
       cookies: {
         getAll() { return cookieStore.getAll() },
